@@ -2,7 +2,8 @@
 
 namespace App\Controller;
 
-use App\DTO\AuthorizationCodeDTO;
+use App\DTO\AuthorizationCodePartOneDTO;
+use App\DTO\AuthorizationCodePartTwoDTO;
 use App\DTO\ClientCredentialsDTO;
 use App\DTO\PasswordCredentialsDTO;
 use App\DTO\RefreshTokenDTO;
@@ -69,19 +70,25 @@ class AuthController extends Controller
     /**
      * Предоставление кода авторизации
      *
-     * @param AuthorizationCodeDTO $params Параметры кода авторизации
+     * @param AuthorizationCodePartTwoDTO $params Параметры кода авторизации
      *
      * @return array
+     * @throws \Spatie\DataTransferObject\Exceptions\UnknownProperties
      */
-    public function authorize(AuthorizationCodeDTO $params): array
+    public function authorize(AuthorizationCodePartTwoDTO $params): array
     {
         $parameters = ['grant_type' => $params::GRANT_TYPE_AUTHORIZATION_CODE];
         foreach ($params as $prop => $value) {
             $parameters[$prop] = $value;
         }
         $request = Request::create($_SERVER['HTTP_HOST'] ?? '', 'POST', $parameters);
-        $request->query->add($_GET);
-        return $this->grantService->autorize($request);
+        $queryParams = ['response_type' => AuthorizationCodePartOneDTO::GRANT_TYPE_RESPONSE_TYPE];
+        $newDTO = new AuthorizationCodePartOneDTO($_GET);
+        foreach ($newDTO as $key => $value) {
+            $queryParams[$key] = $value;
+        }
+        $request->query->add($queryParams);
+        return $this->grantService->authorize($request);
     }
 
     /**

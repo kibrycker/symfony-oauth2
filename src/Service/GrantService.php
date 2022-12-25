@@ -16,10 +16,9 @@ class GrantService
      * @param TokenController $tokenController Контроллер получения токена
      */
     public function __construct(
-        private readonly TokenController $tokenController,
+        private readonly TokenController         $tokenController,
         private readonly AuthorizationController $authorizationController
-    )
-    {}
+    ) {}
 
     /**
      * Получение токена
@@ -34,17 +33,24 @@ class GrantService
         $decode = new JsonDecode();
         $content = $response?->getContent();
         return $decode->decode($content, JsonEncoder::FORMAT, [
-            'json_decode_associative' => true
+            'json_decode_associative' => true,
         ]);
     }
 
-    public function autorize(Request $request): array
+    /**
+     * Получение кода авторизации
+     *
+     * @param Request $request Запрос
+     *
+     * @return array
+     */
+    public function authorize(Request $request): array
     {
         $response = $this->authorizationController->indexAction($request);
         $decode = new JsonDecode();
         $content = $response?->getContent();
         return $decode->decode($content, JsonEncoder::FORMAT, [
-            'json_decode_associative' => true
+            'json_decode_associative' => true,
         ]);
     }
 }

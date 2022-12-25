@@ -18,6 +18,6 @@ class RefreshTokenDTO extends DataTransferObject
     /** @var string Секрет клиента */
     public string $client_secret;
 
-    /** @var string|null  */
-    public ?string $scope  = null;
+    /** @var string Разрешенные области */
+    public string $scope;
 }
