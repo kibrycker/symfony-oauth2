@@ -32,6 +32,9 @@ class GrantService
         $response = $this->tokenController->indexAction($request);
         $decode = new JsonDecode();
         $content = $response?->getContent();
+        if (empty($content)) {
+            return [];
+        }
         return $decode->decode($content, JsonEncoder::FORMAT, [
             'json_decode_associative' => true,
         ]);
@@ -49,6 +52,9 @@ class GrantService
         $response = $this->authorizationController->indexAction($request);
         $decode = new JsonDecode();
         $content = $response?->getContent();
+        if (empty($content)) {
+            return [];
+        }
         return $decode->decode($content, JsonEncoder::FORMAT, [
             'json_decode_associative' => true,
         ]);
