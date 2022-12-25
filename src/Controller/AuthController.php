@@ -9,12 +9,9 @@ use App\DTO\PasswordCredentialsDTO;
 use App\DTO\RefreshTokenDTO;
 use App\Service\GrantService;
 use JsonRpc\Controller;
-use League\Bundle\OAuth2ServerBundle\Controller\AuthorizationController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Serializer\Encoder\JsonDecode;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
 class AuthController extends Controller
 {
@@ -24,7 +21,7 @@ class AuthController extends Controller
      * @param GrantService $grantService Сервис получения токена
      */
     public function __construct(
-        private readonly GrantService            $grantService
+        private readonly GrantService $grantService
     ) {}
 
     #[Route('/api/auth', name: 'api_auth')]
