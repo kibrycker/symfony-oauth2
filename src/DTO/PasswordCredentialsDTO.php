@@ -10,7 +10,7 @@ use Spatie\DataTransferObject\DataTransferObject;
 class PasswordCredentialsDTO extends DataTransferObject
 {
     /** @var string Тип гранта для предоставления токена учетных данных */
-    public const GRANT_TYPE_PASSWORD_CREDENTIALS = 'client_credentials';
+    public const GRANT_TYPE_PASSWORD_CREDENTIALS = 'password';
 
     /** @var string Идентификатор клиента */
     public string $client_id;
@@ -20,4 +20,10 @@ class PasswordCredentialsDTO extends DataTransferObject
 
     /** @var string Разрешенные области */
     public string $scope;
+
+    /** @var string Имя пользователя */
+    public string $username;
+
+    /** @var string Пароль */
+    public string $password;
 }
