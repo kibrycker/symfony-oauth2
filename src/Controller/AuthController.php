@@ -8,6 +8,7 @@ use App\DTO\ClientCredentialsDTO;
 use App\DTO\PasswordCredentialsDTO;
 use App\DTO\RefreshTokenDTO;
 use App\Service\GrantService;
+use Exception;
 use JsonRpc\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -24,7 +25,7 @@ class AuthController extends Controller
         private readonly GrantService $grantService
     ) {}
 
-    #[Route('/api/auth', name: 'api_auth')]
+    #[Route('/auth/token', name: 'api_auth')]
     public function index(Request $request): JsonResponse
     {
         return parent::index($request);
@@ -36,15 +37,12 @@ class AuthController extends Controller
      * @param ClientCredentialsDTO $params
      *
      * @return array
+     * @throws Exception
      */
-    public function clientCredentialsGrant(ClientCredentialsDTO $params): array
+    public function client(ClientCredentialsDTO $params): array
     {
-        $parameters = ['grant_type' => $params::GRANT_TYPE_CLIENT_CREDENTIALS];
-        foreach ($params as $prop => $value) {
-            $parameters[$prop] = $value;
-        }
-        $request = Request::create($_SERVER['HTTP_HOST'] ?? '', 'POST', $parameters);
-        return $this->grantService->getTokenClient($request);
+        $request = $this->getRequest($params, $params::GRANT_TYPE_CLIENT_CREDENTIALS);
+        return $this->grantService->getToken($request);
     }
 
     /**
@@ -53,15 +51,12 @@ class AuthController extends Controller
      * @param PasswordCredentialsDTO $params Параметры предоставления владельца
      *
      * @return array
+     * @throws Exception
      */
-    public function passwordCredentials(PasswordCredentialsDTO $params): array
+    public function password(PasswordCredentialsDTO $params): array
     {
-        $parameters = ['grant_type' => $params::GRANT_TYPE_PASSWORD_CREDENTIALS];
-        foreach ($params as $prop => $value) {
-            $parameters[$prop] = $value;
-        }
-        $request = Request::create($_SERVER['HTTP_HOST'] ?? '', 'POST', $parameters);
-        return $this->grantService->getTokenClient($request);
+        $request = $this->getRequest($params, $params::GRANT_TYPE_PASSWORD_CREDENTIALS);
+        return $this->grantService->getToken($request);
     }
 
     /**
@@ -71,19 +66,19 @@ class AuthController extends Controller
      *
      * @return array
      * @throws \Spatie\DataTransferObject\Exceptions\UnknownProperties
+     * @throws Exception
      */
     public function authorize(AuthorizationCodePartTwoDTO $params): array
     {
-        $parameters = ['grant_type' => $params::GRANT_TYPE_AUTHORIZATION_CODE];
-        foreach ($params as $prop => $value) {
-            $parameters[$prop] = $value;
-        }
-        $request = Request::create($_SERVER['HTTP_HOST'] ?? '', 'POST', $parameters);
+        $request = $this->getRequest($params, $params::GRANT_TYPE_AUTHORIZATION_CODE);
         $queryParams = ['response_type' => AuthorizationCodePartOneDTO::GRANT_TYPE_RESPONSE_TYPE];
         $newDTO = new AuthorizationCodePartOneDTO($_GET);
         foreach ($newDTO as $key => $value) {
             $queryParams[$key] = $value;
         }
+        $queryParams = array_merge($queryParams, [
+            'code_challenge' => $newDTO->codeChallenge(),
+        ]);
         $request->query->add($queryParams);
         return $this->grantService->authorize($request);
     }
@@ -94,15 +89,36 @@ class AuthController extends Controller
      * @param RefreshTokenDTO $params Параметры для сброса токена
      *
      * @return array
+     * @throws Exception
      */
-    public function refreshToken(RefreshTokenDTO $params): array
+    public function refresh(RefreshTokenDTO $params): array
     {
-        $parameters = ['grant_type' => $params::GRANT_TYPE_REFRESH_TOKEN];
+        $request = $this->getRequest($params, $params::GRANT_TYPE_REFRESH_TOKEN);
+        return $this->grantService->getToken($request);
+    }
+
+    /**
+     * Создание запроса для получения токена доступа
+     *
+     * @param array $params Входящие параметры
+     * @param string $grantType Тип гранта доступа
+     *
+     * @return Request
+     * @throws Exception
+     */
+    private function getRequest(mixed $params, string $grantType): Request
+    {
+        if (empty($params)) {
+            throw new Exception('Parameters not passed', 500);
+        }
+        if (empty($grantType)) {
+            throw new Exception('Access grant type not passed', 500);
+        }
+
+        $parameters = ['grant_type' => $grantType];
         foreach ($params as $prop => $value) {
             $parameters[$prop] = $value;
         }
-        $request = Request::create($_SERVER['HTTP_HOST'] ?? '', 'POST', $parameters);
-        return $this->grantService->getTokenClient($request);
+        return Request::create($_SERVER['HTTP_HOST'] ?? '', 'POST', $parameters);
     }
-
 }

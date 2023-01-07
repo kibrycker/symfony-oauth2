@@ -27,7 +27,7 @@ class GrantService
      *
      * @return array
      */
-    public function getTokenClient(Request $request): array
+    public function getToken(Request $request): array
     {
         $response = $this->tokenController->indexAction($request);
         $decode = new JsonDecode();
