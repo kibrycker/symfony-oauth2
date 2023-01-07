@@ -18,7 +18,7 @@ league_oauth2_server:
         public_key: '%env(resolve:OAUTH_PUBLIC_KEY)%'
     scopes:
         available: [EMAIL, PREFERENCES, SUPER_USER]
-        default: [SUPER_USER]
+        default: [EMAIL]
     persistence:
         doctrine: null
 
