@@ -48,6 +48,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     ])]
     private array $roles = [];
 
+    /**
+     * Создание идентификатора
+     */
     public function __construct()
     {
         $this->id = Uuid::uuid4();
@@ -82,7 +85,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * A visual identifier that represents this user.
+     * Визуальный идентификатор, который представляет этого пользователя.
      *
      * @see UserInterface
      */
@@ -161,7 +164,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @return void
      * @see UserInterface
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
