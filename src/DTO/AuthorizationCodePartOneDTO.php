@@ -6,8 +6,11 @@ use Spatie\DataTransferObject\DataTransferObject;
 
 class AuthorizationCodePartOneDTO extends DataTransferObject
 {
-    /** @var string Тип гранта для предоставления токена учетных данных */
-    public const GRANT_TYPE_RESPONSE_TYPE = 'code';
+    /** @var string Тип ответа для передачи в query_string */
+    public const RESPONSE_TYPE = 'code';
+
+    /** @var string Тип ответа */
+    public string $response_type = self::RESPONSE_TYPE;
 
     /** @var string Идентификатор клиента */
     public string $client_id;
@@ -20,6 +23,9 @@ class AuthorizationCodePartOneDTO extends DataTransferObject
 
     /** @var string|null Токен CSRF */
     public ?string $state = null;
+
+    /** @var string|null Код вызова */
+    public ?string $code_challenge = null;
 
     /**
      * Получение кода вызова

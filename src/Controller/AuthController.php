@@ -41,7 +41,7 @@ class AuthController extends Controller
      */
     public function client(ClientCredentialsDTO $params): array
     {
-        $request = $this->getRequest($params, $params::GRANT_TYPE_CLIENT_CREDENTIALS);
+        $request = $this->getRequest($params);
         return $this->grantService->getToken($request);
     }
 
@@ -55,7 +55,7 @@ class AuthController extends Controller
      */
     public function password(PasswordCredentialsDTO $params): array
     {
-        $request = $this->getRequest($params, $params::GRANT_TYPE_PASSWORD_CREDENTIALS);
+        $request = $this->getRequest($params);
         return $this->grantService->getToken($request);
     }
 
@@ -70,16 +70,10 @@ class AuthController extends Controller
      */
     public function authorize(AuthorizationCodePartTwoDTO $params): array
     {
-        $request = $this->getRequest($params, $params::GRANT_TYPE_AUTHORIZATION_CODE);
-        $queryParams = ['response_type' => AuthorizationCodePartOneDTO::GRANT_TYPE_RESPONSE_TYPE];
-        $newDTO = new AuthorizationCodePartOneDTO($_GET);
-        foreach ($newDTO as $key => $value) {
-            $queryParams[$key] = $value;
-        }
-        $queryParams = array_merge($queryParams, [
-            'code_challenge' => $newDTO->codeChallenge(),
-        ]);
-        $request->query->add($queryParams);
+        $request = $this->getRequest($params);
+        $paramsOne = new AuthorizationCodePartOneDTO($_GET);
+        $paramsOne->code_challenge = $paramsOne->codeChallenge();
+        $request->query->add($paramsOne->toArray());
         return $this->grantService->authorize($request);
     }
 
@@ -93,7 +87,7 @@ class AuthController extends Controller
      */
     public function refresh(RefreshTokenDTO $params): array
     {
-        $request = $this->getRequest($params, $params::GRANT_TYPE_REFRESH_TOKEN);
+        $request = $this->getRequest($params);
         return $this->grantService->getToken($request);
     }
 
@@ -101,24 +95,20 @@ class AuthController extends Controller
      * Создание запроса для получения токена доступа
      *
      * @param array $params Входящие параметры
-     * @param string $grantType Тип гранта доступа
      *
      * @return Request
      * @throws Exception
      */
-    private function getRequest(mixed $params, string $grantType): Request
+    private function getRequest(mixed $params): Request
     {
         if (empty($params)) {
             throw new Exception('Parameters not passed', 500);
         }
-        if (empty($grantType)) {
-            throw new Exception('Access grant type not passed', 500);
-        }
 
-        $parameters = ['grant_type' => $grantType];
-        foreach ($params as $prop => $value) {
-            $parameters[$prop] = $value;
-        }
-        return Request::create($_SERVER['HTTP_HOST'] ?? '', 'POST', $parameters);
+        return Request::create(
+            $_SERVER['HTTP_HOST'] ?? '',
+            'POST',
+            $params->toArray()
+        );
     }
 }

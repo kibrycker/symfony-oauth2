@@ -12,6 +12,9 @@ class RefreshTokenDTO extends DataTransferObject
     /** @var string Тип гранта для обновления токена */
     public const GRANT_TYPE_REFRESH_TOKEN = 'refresh_token';
 
+    /** @var string Тип гранта для токена */
+    public string $grant_type = self::GRANT_TYPE_REFRESH_TOKEN;
+
     /** @var string Идентификатор клиента */
     public string $client_id;
 

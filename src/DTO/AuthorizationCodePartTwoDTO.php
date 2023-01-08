@@ -12,6 +12,9 @@ class AuthorizationCodePartTwoDTO extends DataTransferObject
     /** @var string Тип гранта для предоставления токена учетных данных */
     public const GRANT_TYPE_AUTHORIZATION_CODE = 'authorization_code';
 
+    /** @var string Тип гранта для токена */
+    public string $grant_type = self::GRANT_TYPE_AUTHORIZATION_CODE;
+
     /** @var string Идентификатор клиента */
     public string $client_id;
 
